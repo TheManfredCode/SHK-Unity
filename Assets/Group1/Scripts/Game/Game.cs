@@ -1,16 +1,17 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Events;
 
 public class Game : MonoBehaviour
 {
-    [SerializeField] private float _collisionDistance;
     [SerializeField] private PlayerMover _player;
-    [SerializeField] private GameObject _darkScreen;
 
     private ObjectMover[] _objectMovers;
     private Enemy[] _enemies;
     private int _enemyCount;
+
+    public event UnityAction Finished;
 
     private void Start()
     {
@@ -26,7 +27,7 @@ public class Game : MonoBehaviour
             if (objectMover == null)
                 continue;
 
-            if (Vector3.Distance(_player.transform.position, objectMover.transform.position) < _collisionDistance)
+            if (objectMover.TryToCollide(_player.transform.position))
             {
                 if (objectMover.TryGetComponent(out Enemy enemy))
                 {
@@ -37,8 +38,8 @@ public class Game : MonoBehaviour
 
                 if (objectMover.TryGetComponent(out SpeedBooster speedBooster))
                 {
-                    _player.BoostSpeed();
-                    Destroy(objectMover.gameObject);
+                    speedBooster.BoostSpeed(_player);
+                    Destroy(speedBooster.gameObject);
                 }
             }
         }
@@ -47,11 +48,7 @@ public class Game : MonoBehaviour
     private void CheckEnemies()
     {
         if (_enemyCount <= 0)
-            End();
+            Finished?.Invoke();
     }
 
-    private void End()
-    {
-        _darkScreen.SetActive(true);
-    }
 }

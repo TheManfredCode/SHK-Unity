@@ -5,38 +5,29 @@ using UnityEngine;
 public class PlayerMover : MonoBehaviour
 {
     [SerializeField] private float _startSpeed;
-    [SerializeField] private float _multiplySpeedValue;
-    [SerializeField] private float _speedBoostDuration;
 
-    private WaitForSeconds _waitSpeedBoostDuration;
     private float _currentSpeed;
 
     private void Start()
     {
-        _waitSpeedBoostDuration = new WaitForSeconds(_speedBoostDuration);
         _currentSpeed = _startSpeed;
     }
 
-    public void MoveHorizontal(int direction)
+    public void Move(float horizontal, float vertical)
     {
-        transform.Translate(0, _currentSpeed * direction * Time.deltaTime, 0);
+        transform.Translate(_currentSpeed * horizontal * Time.deltaTime, _currentSpeed * vertical * Time.deltaTime, 0);
     }
 
-    public void MoveVertical(int direction)
+    public void BoostSpeed(float multiplySpeedValue, float speedBoostDuration)
     {
-        transform.Translate(_currentSpeed * direction * Time.deltaTime, 0, 0);
+        StartCoroutine(SpeedBoostTimer(multiplySpeedValue, speedBoostDuration));
     }
 
-    public void BoostSpeed()
+    public IEnumerator SpeedBoostTimer(float multiplySpeedValue, float speedBoostDuration)
     {
-        _currentSpeed *= _multiplySpeedValue;
+        _currentSpeed *= multiplySpeedValue;
 
-        StartCoroutine(SpeedBoostTimer());
-    }
-
-    private IEnumerator SpeedBoostTimer()
-    {
-        yield return _waitSpeedBoostDuration;
+        yield return new WaitForSeconds(speedBoostDuration);
 
         _currentSpeed = _startSpeed;
     }
